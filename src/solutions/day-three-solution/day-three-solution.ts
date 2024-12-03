@@ -8,7 +8,7 @@ const decodeFunction = (mul: string): number => {
     return x * y;
 };
 
-export const dayThreeSolution = (file: string) => {
+export const dayThreeSolutionPartOne = (file: string) => {
     const regex = /mul[(](\d|\d\d|\d\d\d)[,](\d|\d\d|\d\d\d)[)]/g;
 
     const matches = file.match(regex);
@@ -22,4 +22,8 @@ export const dayThreeSolution = (file: string) => {
     }, 0);
 
     return result;
+};
+
+export const dayThreeSolutionPartTwo = (file: string) => {
+    return 0;
 };
