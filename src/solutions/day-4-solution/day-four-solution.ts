@@ -101,3 +101,7 @@ export const dayFourSolutionPartOne = (fileLines: string[]) => {
 
     return total;
 };
+
+export const dayFourSolutionPartTwo = (fileLines: string[]) => {
+    return 0;
+};

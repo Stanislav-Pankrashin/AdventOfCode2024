@@ -10,4 +10,12 @@ describe("Day Four Solution", () => {
 
         expect(result).toBe(18);
     });
+
+    it("should count the correct number of x-mas", () => {
+        const file = readFileByLine(path.resolve(__dirname, "test-input.txt"));
+
+        const result = dayFourSolutionPartTwo(file);
+
+        expect(result).toBe(9);
+    });
 });
