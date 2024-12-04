@@ -71,6 +71,47 @@ const findXmas = (
     return result;
 };
 
+const findCrossmas = (
+    lettersMatrix: LettersMatrix,
+    coOrdinate: LetterPoint,
+): boolean => {
+    const { x, y } = coOrdinate.point;
+
+    const leftToRightDiagonal: Point[] = [
+        { x: x - 1, y: y + 1 },
+        { x: x + 1, y: y - 1 },
+    ];
+    const rightToLeftDiagonal: Point[] = [
+        { x: x + 1, y: y + 1 },
+        { x: x - 1, y: y - 1 },
+    ];
+
+    const crossCoOrdinatesInvalid = [
+        ...leftToRightDiagonal,
+        ...rightToLeftDiagonal,
+    ].some(
+        (point) =>
+            point.x < 0 ||
+            point.y < 0 ||
+            point.x >= lettersMatrix[0].length ||
+            point.y >= lettersMatrix.length,
+    );
+
+    if (crossCoOrdinatesInvalid) {
+        return false;
+    }
+
+    const leftToRightLetters = `${lettersMatrix[leftToRightDiagonal[0].y][leftToRightDiagonal[0].x]}A${lettersMatrix[leftToRightDiagonal[1].y][leftToRightDiagonal[1].x]}`;
+    const rightToLeftLetters = `${lettersMatrix[rightToLeftDiagonal[0].y][rightToLeftDiagonal[0].x]}A${lettersMatrix[rightToLeftDiagonal[1].y][rightToLeftDiagonal[1].x]}`;
+
+    const validAnswers = ["MAS", "SAM"];
+
+    return (
+        validAnswers.includes(leftToRightLetters) &&
+        validAnswers.includes(rightToLeftLetters)
+    );
+};
+
 export const dayFourSolutionPartOne = (fileLines: string[]) => {
     const lettersMatrix: LettersMatrix = fileLines.map((line) =>
         line.split(""),
@@ -103,5 +144,34 @@ export const dayFourSolutionPartOne = (fileLines: string[]) => {
 };
 
 export const dayFourSolutionPartTwo = (fileLines: string[]) => {
-    return 0;
+    const lettersMatrix: LettersMatrix = fileLines.map((line) =>
+        line.split(""),
+    );
+
+    let total = 0;
+
+    for (let y = 0; y < lettersMatrix.length; y++) {
+        const line = lettersMatrix[y];
+        for (let x = 0; x < line.length; x++) {
+            if (line[x] !== "A") {
+                continue;
+            }
+
+            const coOrdinate: LetterPoint = {
+                letter: line[x],
+                point: {
+                    x,
+                    y,
+                },
+            };
+
+            const result = findCrossmas(lettersMatrix, coOrdinate);
+
+            if (result) {
+                total++;
+            }
+        }
+    }
+
+    return total;
 };
