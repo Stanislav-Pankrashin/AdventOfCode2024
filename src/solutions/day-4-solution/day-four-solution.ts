@@ -1,99 +1,74 @@
 type LettersMatrix = string[][];
-type LetterCoOrdinate = { letter: string; x: number; y: number };
-
-enum XmasMap {
-    X = "M",
-    M = "A",
-    A = "S",
-    S = "DONE",
-    // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
-    DONE = "DONE",
-}
-
-type XmasOrDone = "X" | "M" | "A" | "S" | "DONE";
-
-const findAdjacentLetters = (
-    lettersMatrix: LettersMatrix,
-    coOrdinate: LetterCoOrdinate,
-): LetterCoOrdinate[] => {
-    const lineAbove = coOrdinate.y - 1 >= 0 ? coOrdinate.y - 1 : -1;
-    const lineBelow =
-        coOrdinate.y + 1 <= lettersMatrix.length - 1 ? coOrdinate.y + 1 : -1;
-
-    const leftLetter = coOrdinate.x - 1 >= 0 ? coOrdinate.x - 1 : -1;
-    const rightLetter =
-        coOrdinate.x + 1 <= lettersMatrix[0].length - 1 ? coOrdinate.x + 1 : -1;
-
-    const adjacentLetters: LetterCoOrdinate[] = [];
-
-    adjacentLetters.push({
-        letter: "",
-        x: leftLetter,
-        y: lineAbove,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: rightLetter,
-        y: lineAbove,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: coOrdinate.x,
-        y: lineAbove,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: leftLetter,
-        y: lineBelow,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: coOrdinate.x,
-        y: lineBelow,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: rightLetter,
-        y: lineBelow,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: leftLetter,
-        y: coOrdinate.y,
-    });
-    adjacentLetters.push({
-        letter: "",
-        x: rightLetter,
-        y: coOrdinate.y,
-    });
-
-    const adjacentProcessed: LetterCoOrdinate[] = adjacentLetters
-        .filter((coOrd) => coOrd.x !== -1 && coOrd.y !== -1)
-        .map((coOrd) => ({
-            letter: lettersMatrix[coOrd.y][coOrd.x],
-            x: coOrd.x,
-            y: coOrd.y,
-        }));
-
-    return adjacentProcessed;
-};
+type Point = { x: number; y: number };
+type LetterPoint = { letter: string; point: Point };
+const XMAS = "XMAS";
 
 const findXmas = (
     lettersMatrix: LettersMatrix,
-    coOrdinate: LetterCoOrdinate,
-    target: XmasOrDone,
-): boolean => {
-    if (target === "DONE") return true;
+    coOrdinate: LetterPoint,
+): number => {
+    const generateList = (
+        point: Point,
+        increment: { x: number; y: number },
+    ): Point[] => {
+        const list = [];
+        let x = point.x;
+        let y = point.y;
 
-    const adjacentLetters = findAdjacentLetters(lettersMatrix, coOrdinate);
+        for (let i = 0; i < 3; i++) {
+            x += increment.x;
+            y += increment.y;
+            list.push({
+                x: x,
+                y: y,
+            });
+        }
 
-    const adjacentLetter: LetterCoOrdinate | null =
-        adjacentLetters.filter((letter) => letter.letter === target)?.[0] ??
-        null;
+        return list;
+    };
 
-    if (adjacentLetter === null) return false;
+    const horizonalForward = generateList(coOrdinate.point, { x: 1, y: 0 });
+    const horizontalBackward = generateList(coOrdinate.point, { x: -1, y: 0 });
+    const verticalUp = generateList(coOrdinate.point, { x: 0, y: 1 });
+    const verticalDown = generateList(coOrdinate.point, { x: 0, y: -1 });
+    const diagonalUpLeft = generateList(coOrdinate.point, { x: -1, y: 1 });
+    const diagonalUpRight = generateList(coOrdinate.point, { x: 1, y: 1 });
+    const diagonalDownLeft = generateList(coOrdinate.point, { x: -1, y: -1 });
+    const diagonalDownRight = generateList(coOrdinate.point, { x: 1, y: -1 });
 
-    return findXmas(lettersMatrix, adjacentLetter, XmasMap[target]);
+    const allDirections = [
+        horizonalForward,
+        horizontalBackward,
+        verticalUp,
+        verticalDown,
+        diagonalUpLeft,
+        diagonalUpRight,
+        diagonalDownLeft,
+        diagonalDownRight,
+    ];
+
+    const result = allDirections.reduce((acc, direction) => {
+        const isValid = direction.every((point) => {
+            return (
+                point.x >= 0 &&
+                point.y >= 0 &&
+                point.x < lettersMatrix[0].length &&
+                point.y < lettersMatrix.length
+            );
+        });
+
+        if (!isValid) return acc;
+
+        const letters = direction.reduce(
+            (acc, point) => acc.concat(lettersMatrix[point.y][point.x]),
+            "X",
+        );
+        const result = letters === XMAS;
+
+        return result ? acc + 1 : acc;
+    }, 0);
+
+    return result;
 };
 
 export const dayFourSolutionPartOne = (fileLines: string[]) => {
@@ -110,17 +85,17 @@ export const dayFourSolutionPartOne = (fileLines: string[]) => {
                 continue;
             }
 
-            const coOrdinate: LetterCoOrdinate = {
+            const coOrdinate: LetterPoint = {
                 letter: line[x],
-                x,
-                y,
+                point: {
+                    x,
+                    y,
+                },
             };
-            console.log(coOrdinate);
 
-            const result = findXmas(lettersMatrix, coOrdinate, "M");
-            console.log(result);
+            const result = findXmas(lettersMatrix, coOrdinate);
 
-            if (result) total++;
+            total += result;
         }
     }
 
