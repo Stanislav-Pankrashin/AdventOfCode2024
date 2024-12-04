@@ -3,10 +3,20 @@ type Point = { x: number; y: number };
 type LetterPoint = { letter: string; point: Point };
 const XMAS = "XMAS";
 
+/**
+ * Finds the number of times the word XMAS can be made from the given point
+ * Assumes that the given point is an X
+ * Checks in horizontal, vertical, and diagonal directions
+ * @param lettersMatrix
+ * @param coOrdinate
+ * @returns
+ */
 const findXmas = (
     lettersMatrix: LettersMatrix,
     coOrdinate: LetterPoint,
 ): number => {
+    // Generates a list of points based on the given point and increment
+    // These points typically will be to check for horizontal, vertical, and diagonal directions from the given point
     const generateList = (
         point: Point,
         increment: { x: number; y: number },
@@ -71,6 +81,17 @@ const findXmas = (
     return result;
 };
 
+/**
+ * Checks to see if the given point is surrounded by the letters MS in a cross pattern
+ * The letters can be in any direction
+ * e.g:
+ * M.S
+ * .A.
+ * M.S
+ * @param lettersMatrix
+ * @param coOrdinate
+ * @returns
+ */
 const findCrossmas = (
     lettersMatrix: LettersMatrix,
     coOrdinate: LetterPoint,
@@ -101,10 +122,12 @@ const findCrossmas = (
         return false;
     }
 
-    const leftToRightLetters = `${lettersMatrix[leftToRightDiagonal[0].y][leftToRightDiagonal[0].x]}A${lettersMatrix[leftToRightDiagonal[1].y][leftToRightDiagonal[1].x]}`;
-    const rightToLeftLetters = `${lettersMatrix[rightToLeftDiagonal[0].y][rightToLeftDiagonal[0].x]}A${lettersMatrix[rightToLeftDiagonal[1].y][rightToLeftDiagonal[1].x]}`;
+    const getLetterAtPoint = (point: Point) => lettersMatrix[point.y][point.x];
 
-    const validAnswers = ["MAS", "SAM"];
+    const leftToRightLetters = `${getLetterAtPoint(leftToRightDiagonal[0])}${getLetterAtPoint(leftToRightDiagonal[1])}`;
+    const rightToLeftLetters = `${getLetterAtPoint(rightToLeftDiagonal[0])}${getLetterAtPoint(rightToLeftDiagonal[1])}`;
+
+    const validAnswers = ["MS", "SM"];
 
     return (
         validAnswers.includes(leftToRightLetters) &&
