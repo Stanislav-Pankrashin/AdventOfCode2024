@@ -1,6 +1,5 @@
 type LettersMatrix = string[][];
 type Point = { x: number; y: number };
-type LetterPoint = { letter: string; point: Point };
 const XMAS = "XMAS";
 
 /**
@@ -8,13 +7,10 @@ const XMAS = "XMAS";
  * Assumes that the given point is an X
  * Checks in horizontal, vertical, and diagonal directions
  * @param lettersMatrix
- * @param coOrdinate
+ * @param letterPoint
  * @returns
  */
-const findXmas = (
-    lettersMatrix: LettersMatrix,
-    coOrdinate: LetterPoint,
-): number => {
+const findXmas = (lettersMatrix: LettersMatrix, letterPoint: Point): number => {
     // Generates a list of points based on the given point and increment
     // These points typically will be to check for horizontal, vertical, and diagonal directions from the given point
     const generateList = (
@@ -37,14 +33,14 @@ const findXmas = (
         return list;
     };
 
-    const horizonalForward = generateList(coOrdinate.point, { x: 1, y: 0 });
-    const horizontalBackward = generateList(coOrdinate.point, { x: -1, y: 0 });
-    const verticalUp = generateList(coOrdinate.point, { x: 0, y: 1 });
-    const verticalDown = generateList(coOrdinate.point, { x: 0, y: -1 });
-    const diagonalUpLeft = generateList(coOrdinate.point, { x: -1, y: 1 });
-    const diagonalUpRight = generateList(coOrdinate.point, { x: 1, y: 1 });
-    const diagonalDownLeft = generateList(coOrdinate.point, { x: -1, y: -1 });
-    const diagonalDownRight = generateList(coOrdinate.point, { x: 1, y: -1 });
+    const horizonalForward = generateList(letterPoint, { x: 1, y: 0 });
+    const horizontalBackward = generateList(letterPoint, { x: -1, y: 0 });
+    const verticalUp = generateList(letterPoint, { x: 0, y: 1 });
+    const verticalDown = generateList(letterPoint, { x: 0, y: -1 });
+    const diagonalUpLeft = generateList(letterPoint, { x: -1, y: 1 });
+    const diagonalUpRight = generateList(letterPoint, { x: 1, y: 1 });
+    const diagonalDownLeft = generateList(letterPoint, { x: -1, y: -1 });
+    const diagonalDownRight = generateList(letterPoint, { x: 1, y: -1 });
 
     const allDirections = [
         horizonalForward,
@@ -89,14 +85,14 @@ const findXmas = (
  * .A.
  * M.S
  * @param lettersMatrix
- * @param coOrdinate
+ * @param letterPoint
  * @returns
  */
 const findCrossmas = (
     lettersMatrix: LettersMatrix,
-    coOrdinate: LetterPoint,
+    letterPoint: Point,
 ): boolean => {
-    const { x, y } = coOrdinate.point;
+    const { x, y } = letterPoint;
 
     const leftToRightDiagonal: Point[] = [
         { x: x - 1, y: y + 1 },
@@ -107,7 +103,7 @@ const findCrossmas = (
         { x: x - 1, y: y - 1 },
     ];
 
-    const crossCoOrdinatesInvalid = [
+    const crossPointsInvalid = [
         ...leftToRightDiagonal,
         ...rightToLeftDiagonal,
     ].some(
@@ -118,7 +114,7 @@ const findCrossmas = (
             point.y >= lettersMatrix.length,
     );
 
-    if (crossCoOrdinatesInvalid) {
+    if (crossPointsInvalid) {
         return false;
     }
 
@@ -149,15 +145,12 @@ export const dayFourSolutionPartOne = (fileLines: string[]) => {
                 continue;
             }
 
-            const coOrdinate: LetterPoint = {
-                letter: line[x],
-                point: {
-                    x,
-                    y,
-                },
+            const letterPoint: Point = {
+                x,
+                y,
             };
 
-            const result = findXmas(lettersMatrix, coOrdinate);
+            const result = findXmas(lettersMatrix, letterPoint);
 
             total += result;
         }
@@ -180,15 +173,12 @@ export const dayFourSolutionPartTwo = (fileLines: string[]) => {
                 continue;
             }
 
-            const coOrdinate: LetterPoint = {
-                letter: line[x],
-                point: {
-                    x,
-                    y,
-                },
+            const letterPoint: Point = {
+                x,
+                y,
             };
 
-            const result = findCrossmas(lettersMatrix, coOrdinate);
+            const result = findCrossmas(lettersMatrix, letterPoint);
 
             if (result) {
                 total++;
