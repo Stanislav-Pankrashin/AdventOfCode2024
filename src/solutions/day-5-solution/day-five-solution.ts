@@ -1,5 +1,7 @@
 type RulesMap = Record<string, string[] | undefined>;
 
+// The value for a key contains all numbers that must come after the key
+// In other words the key must come before any occurances of the values in an update
 const processRules = (rules: string): RulesMap => {
     const rulesMap: RulesMap = {};
 
@@ -46,6 +48,7 @@ const sumCorrectUpdates = (
 
         const updateCopy = [...updateList];
 
+        // Sort the copy to see if it is correctly ordered
         updateCopy.sort(sortUpdate);
 
         if (updateCopy.toString() === updateList.toString()) {
