@@ -30,16 +30,16 @@ const sumCorrectUpdates = (
 
         const updateList = update.split(",");
 
-        const sortUpdate = (x: string, y: string) => {
-            if (x === y) return 0;
+        const sortUpdate = (a: string, b: string) => {
+            if (a === b) return 0;
 
-            const mustGoBefore = rulesMap[x];
-            const mustGoAfter = rulesMap[y];
+            const mustGoBefore = rulesMap[a];
+            const mustGoAfter = rulesMap[b];
 
-            if (mustGoBefore !== undefined && mustGoBefore.includes(y)) {
+            if (mustGoBefore !== undefined && mustGoBefore.includes(b)) {
                 return -1;
             }
-            if (mustGoAfter !== undefined && mustGoAfter.includes(x)) {
+            if (mustGoAfter !== undefined && mustGoAfter.includes(a)) {
                 return 1;
             }
 
