@@ -76,3 +76,13 @@ export const dayFiveSolutionPartOne = (file: string) => {
 
     return total;
 };
+
+export const dayFiveSolutionPartTwo = (file: string) => {
+    const [rules, updates] = file.split("\n\n");
+
+    const rulesMap = processRules(rules);
+
+    const total = sumCorrectUpdates(updates, rulesMap);
+
+    return total;
+};
