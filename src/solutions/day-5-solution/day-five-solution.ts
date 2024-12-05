@@ -1,5 +1,4 @@
-type RulesMap = Record<string, string[]>;
-type UpdateMap = Record<string, number>;
+type RulesMap = Record<string, string[] | undefined>;
 
 const processRules = (rules: string): RulesMap => {
     const rulesMap: RulesMap = {};
@@ -13,24 +12,14 @@ const processRules = (rules: string): RulesMap => {
     return rulesMap;
 };
 
-const processUpdate = (update: string[]): UpdateMap => {
-    // Map containing a number and the index it is on
-    const updatesMap: UpdateMap = {};
-
-    update.forEach((update, index) => {
-        updatesMap[update] = index;
-    });
-
-    return updatesMap;
-};
-
 const sumCorrectUpdates = (
     updatesString: string,
     rulesMap: RulesMap,
-): number => {
+): { correctTotal: number; incorrectTotal: number } => {
     const updatesList = updatesString.split("\n");
 
-    let total = 0;
+    let correctTotal = 0;
+    let incorrectTotal = 0;
 
     for (const update of updatesList) {
         if (update.length === 0) {
@@ -39,32 +28,36 @@ const sumCorrectUpdates = (
 
         const updateList = update.split(",");
 
-        const updateMap = processUpdate(updateList);
+        const sortUpdate = (x: string, y: string) => {
+            if (x === y) return 0;
 
-        const correctUpdate = updateList.every((updatePage, index) => {
-            const numbersMustGoBefore = rulesMap[updatePage];
+            const mustGoBefore = rulesMap[x];
+            const mustGoAfter = rulesMap[y];
 
-            if (numbersMustGoBefore === undefined) {
-                return true;
+            if (mustGoBefore !== undefined && mustGoBefore.includes(y)) {
+                return -1;
+            }
+            if (mustGoAfter !== undefined && mustGoAfter.includes(x)) {
+                return 1;
             }
 
-            const numberInCorrectPlace = numbersMustGoBefore.every((number) => {
-                const numberIndex = updateMap?.[number] ?? Infinity;
+            return 0;
+        };
 
-                return numberIndex > index;
-            });
+        const updateCopy = [...updateList];
 
-            return numberInCorrectPlace;
-        });
+        updateCopy.sort(sortUpdate);
 
-        if (correctUpdate) {
+        if (updateCopy.toString() === updateList.toString()) {
             const indexOfMiddle = Math.ceil((updateList.length - 1) / 2);
-
-            total += parseInt(updateList[indexOfMiddle]);
+            correctTotal += parseInt(updateList[indexOfMiddle]);
+        } else {
+            const indexOfMiddle = Math.ceil((updateCopy.length - 1) / 2);
+            incorrectTotal += parseInt(updateCopy[indexOfMiddle]);
         }
     }
 
-    return total;
+    return { correctTotal, incorrectTotal };
 };
 
 export const dayFiveSolutionPartOne = (file: string) => {
@@ -72,9 +65,9 @@ export const dayFiveSolutionPartOne = (file: string) => {
 
     const rulesMap = processRules(rules);
 
-    const total = sumCorrectUpdates(updates, rulesMap);
+    const totals = sumCorrectUpdates(updates, rulesMap);
 
-    return total;
+    return totals.correctTotal;
 };
 
 export const dayFiveSolutionPartTwo = (file: string) => {
@@ -82,7 +75,7 @@ export const dayFiveSolutionPartTwo = (file: string) => {
 
     const rulesMap = processRules(rules);
 
-    const total = sumCorrectUpdates(updates, rulesMap);
+    const totals = sumCorrectUpdates(updates, rulesMap);
 
-    return total;
+    return totals.incorrectTotal;
 };
