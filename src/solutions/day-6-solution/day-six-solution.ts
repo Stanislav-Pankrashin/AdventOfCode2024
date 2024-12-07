@@ -1,15 +1,20 @@
 type Point = { x: number; y: number };
-type ValidMapItems = UnvisitedLocation | ImpassableLocation | VisitedLocation;
+type ValidMapItems =
+    | UnvisitedLocation
+    | ImpassableLocation
+    | VisitedLocation
+    | GuardLocation;
 
 type ImpassableLocation = "#";
 type UnvisitedLocation = ".";
 type VisitedLocation = "X";
+type GuardLocation = keyof typeof GuardOrientationsMap;
 
 enum GuardOrientations {
-    UP = "^",
-    DOWN = "V",
-    LEFT = "<",
-    RIGHT = ">",
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
 }
 
 enum GuardOrientationsMap {
@@ -37,7 +42,7 @@ class Map {
 
         // Mark the guard's initial position as visited
         this._map[this.guardInitialPosition.y][this.guardInitialPosition.x] =
-            "X";
+            ".";
     }
 
     private _getGuardInitialPosition() {
@@ -46,10 +51,14 @@ class Map {
                 const line = this._map[y];
                 for (let x = 0; x < line.length; x++) {
                     if (line[x] in GuardOrientationsMap) {
-                        // I hate this
-                        const orientation = GuardOrientationsMap[
-                            line[x] as keyof typeof GuardOrientationsMap
-                        ] as unknown as GuardOrientations;
+                        const guard = line[
+                            x
+                        ] as unknown as GuardOrientationsMap;
+
+                        const orientation: GuardOrientations =
+                            GuardOrientationsMap[
+                                guard
+                            ] as unknown as GuardOrientations;
                         return {
                             point: { x, y },
                             orientation,
@@ -72,8 +81,15 @@ class Map {
         return this._map?.[position.y]?.[position.x] === "#";
     }
 
-    setPositionVisited(position: Point) {
+    setPositionVisited(position: Point): boolean {
+        if (this._map?.[position.y]?.[position.x] !== ".") return false;
         this._map[position.y][position.x] = "X";
+        return true;
+    }
+
+    setPositionObstructed(position: Point) {
+        if (!this._map?.[position.y]?.[position.x]) return;
+        this._map[position.y][position.x] = "#";
     }
 
     isPositionOutOfBounds(position: Point): boolean {
@@ -103,7 +119,13 @@ class Guard {
         this.orientation = orientation;
     }
 
-    move(map: Map) {
+    /**
+     * Returns a boolean indicating if the guard moved
+     * False if the guard rotated
+     * @param map
+     * @returns
+     */
+    move(map: Map): boolean {
         const newPosition = { ...this.position };
 
         switch (this.orientation) {
@@ -123,10 +145,11 @@ class Guard {
 
         if (map.isPositionObstructed(newPosition)) {
             this.rotate();
-            return;
+            return false;
         }
 
         this.position = newPosition;
+        return true;
     }
 
     rotate() {
@@ -147,6 +170,26 @@ class Guard {
     }
 }
 
+class LocationHistory {
+    private _locations: Record<
+        number,
+        Record<number, Set<GuardOrientations> | undefined> | undefined
+    > = {};
+
+    addLocation(location: Point, orientation: GuardOrientations) {
+        this._locations[location.y] ??= {};
+        this._locations[location.y]![location.x] ??= new Set();
+
+        this._locations[location.y]![location.x]!.add(orientation);
+    }
+
+    hasLocation(location: Point, orientation: GuardOrientations): boolean {
+        return (
+            this._locations[location.y]?.[location.x]?.has(orientation) ?? false
+        );
+    }
+}
+
 export const daySixSolutionPartOne = (fileLines: string[]) => {
     const map = new Map(fileLines);
 
@@ -156,13 +199,13 @@ export const daySixSolutionPartOne = (fileLines: string[]) => {
     );
 
     while (true) {
+        map.setPositionVisited(guard.position);
+
         guard.move(map);
 
         if (map.isPositionOutOfBounds(guard.position)) {
             break;
         }
-
-        map.setPositionVisited(guard.position);
     }
 
     return map.countVisitedLocations();
@@ -176,15 +219,60 @@ export const daySixSolutionPartTwo = (fileLines: string[]) => {
         mapInitial.guardInitialOrientation,
     );
 
+    // First get list of all unique locations visited
+    const visitedLocations: Point[] = [];
+
     while (true) {
-        guard.move(mapInitial);
+        const moved = guard.move(mapInitial);
+
+        if (moved) {
+            const updatedMap = mapInitial.setPositionVisited(guard.position);
+            if (updatedMap) visitedLocations.push(guard.position);
+        }
 
         if (mapInitial.isPositionOutOfBounds(guard.position)) {
             break;
         }
-
-        mapInitial.setPositionVisited(guard.position);
     }
 
-    return mapInitial.countVisitedLocations();
+    let possibleLoops = 0;
+
+    for (const location of visitedLocations) {
+        const map = new Map(fileLines);
+
+        const guardLoop = new Guard(
+            map.guardInitialPosition,
+            map.guardInitialOrientation,
+        );
+
+        map.setPositionObstructed(location);
+
+        const locationHistory = new LocationHistory();
+
+        while (true) {
+            if (
+                locationHistory.hasLocation(
+                    guardLoop.position,
+                    guardLoop.orientation,
+                )
+            ) {
+                // We're in a loop!
+                possibleLoops++;
+                break;
+            }
+
+            locationHistory.addLocation(
+                guardLoop.position,
+                guardLoop.orientation,
+            );
+
+            guardLoop.move(map);
+
+            if (map.isPositionOutOfBounds(guardLoop.position)) {
+                break;
+            }
+        }
+    }
+
+    return possibleLoops;
 };
