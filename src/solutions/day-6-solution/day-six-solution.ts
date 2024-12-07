@@ -167,3 +167,24 @@ export const daySixSolutionPartOne = (fileLines: string[]) => {
 
     return map.countVisitedLocations();
 };
+
+export const daySixSolutionPartTwo = (fileLines: string[]) => {
+    const mapInitial = new Map(fileLines);
+
+    const guard = new Guard(
+        mapInitial.guardInitialPosition,
+        mapInitial.guardInitialOrientation,
+    );
+
+    while (true) {
+        guard.move(mapInitial);
+
+        if (mapInitial.isPositionOutOfBounds(guard.position)) {
+            break;
+        }
+
+        mapInitial.setPositionVisited(guard.position);
+    }
+
+    return mapInitial.countVisitedLocations();
+};
