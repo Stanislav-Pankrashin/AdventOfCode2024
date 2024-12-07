@@ -5,7 +5,7 @@ import {
     dayFiveSolutionPartTwo,
 } from "../day-five-solution";
 
-describe("Day Four Solution", () => {
+describe("Day Five Solution", () => {
     it("should count the correct middle number of correct updates", () => {
         const file = readFile(path.resolve(__dirname, "test-input.txt"));
 
