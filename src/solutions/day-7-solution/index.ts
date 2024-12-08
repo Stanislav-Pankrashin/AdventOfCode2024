@@ -1,5 +1,8 @@
 import path from "path";
-import { daySevenSolutionPartOne } from "./day-seven-solution";
+import {
+    daySevenSolutionPartOne,
+    daySevenSolutionPartTwo,
+} from "./day-seven-solution";
 import { readFileByLine } from "../../helpers/read-file";
 
 const main = () => {
@@ -7,7 +10,9 @@ const main = () => {
     const file = readFileByLine(filePath);
 
     const solutionPartOne = daySevenSolutionPartOne(file);
+    const solutionPartTwo = daySevenSolutionPartTwo(file);
     console.log("Solution part seven part one:", solutionPartOne);
+    console.log("Solution part seven part two:", solutionPartTwo);
 };
 
 main();

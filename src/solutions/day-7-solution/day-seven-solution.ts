@@ -50,3 +50,29 @@ export const daySevenSolutionPartOne = (fileLines: string[]) => {
 
     return total;
 };
+
+export const daySevenSolutionPartTwo = (fileLines: string[]) => {
+    const fileFormatted = fileLines.map((line) => {
+        const [targetString, valuesString] = line.split(": ");
+
+        const target = parseInt(targetString);
+        const values = valuesString.split(" ").map((value) => parseInt(value));
+
+        return { target, values };
+    });
+
+    const validCalculations = fileFormatted
+        .map((line) => {
+            return validCalculation(
+                line.target,
+                line.values[0],
+                1,
+                line.values,
+            );
+        })
+        .filter((result) => result !== -1);
+
+    const total = validCalculations.reduce((acc, result) => acc + result, 0);
+
+    return total;
+};
