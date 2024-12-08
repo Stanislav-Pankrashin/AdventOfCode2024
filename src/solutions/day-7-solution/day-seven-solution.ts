@@ -1,10 +1,11 @@
-const validCalculation = (
+const getTotalOfCalculation = (
     target: number,
     total: number,
-    currentIndex: number,
     values: number[],
+    allowConcatenation: boolean = false,
+    currentIndex: number = 1,
 ): number | -1 => {
-    if (target === total) {
+    if (target === total && currentIndex === values.length) {
         return total;
     }
 
@@ -14,10 +15,38 @@ const validCalculation = (
 
     const added = total + values[currentIndex];
     const multiplied = total * values[currentIndex];
+    const concatenated = parseInt(`${total}${values[currentIndex]}`);
+
+    const addedResult = getTotalOfCalculation(
+        target,
+        added,
+        values,
+        allowConcatenation,
+        currentIndex + 1,
+    );
+
+    const multipliedResult = getTotalOfCalculation(
+        target,
+        multiplied,
+        values,
+        allowConcatenation,
+        currentIndex + 1,
+    );
+
+    const concatenatedResult = allowConcatenation
+        ? getTotalOfCalculation(
+              target,
+              concatenated,
+              values,
+              allowConcatenation,
+              currentIndex + 1,
+          )
+        : -1;
 
     if (
-        validCalculation(target, added, currentIndex + 1, values) !== -1 ||
-        validCalculation(target, multiplied, currentIndex + 1, values) !== -1
+        addedResult !== -1 ||
+        multipliedResult !== -1 ||
+        concatenatedResult !== -1
     ) {
         return target;
     }
@@ -25,7 +54,7 @@ const validCalculation = (
     return -1;
 };
 
-export const daySevenSolutionPartOne = (fileLines: string[]) => {
+const getValidTotal = (fileLines: string[], allowConcatenation = false) => {
     const fileFormatted = fileLines.map((line) => {
         const [targetString, valuesString] = line.split(": ");
 
@@ -37,11 +66,11 @@ export const daySevenSolutionPartOne = (fileLines: string[]) => {
 
     const validCalculations = fileFormatted
         .map((line) => {
-            return validCalculation(
+            return getTotalOfCalculation(
                 line.target,
                 line.values[0],
-                1,
                 line.values,
+                allowConcatenation,
             );
         })
         .filter((result) => result !== -1);
@@ -51,28 +80,10 @@ export const daySevenSolutionPartOne = (fileLines: string[]) => {
     return total;
 };
 
+export const daySevenSolutionPartOne = (fileLines: string[]) => {
+    return getValidTotal(fileLines);
+};
+
 export const daySevenSolutionPartTwo = (fileLines: string[]) => {
-    const fileFormatted = fileLines.map((line) => {
-        const [targetString, valuesString] = line.split(": ");
-
-        const target = parseInt(targetString);
-        const values = valuesString.split(" ").map((value) => parseInt(value));
-
-        return { target, values };
-    });
-
-    const validCalculations = fileFormatted
-        .map((line) => {
-            return validCalculation(
-                line.target,
-                line.values[0],
-                1,
-                line.values,
-            );
-        })
-        .filter((result) => result !== -1);
-
-    const total = validCalculations.reduce((acc, result) => acc + result, 0);
-
-    return total;
+    return getValidTotal(fileLines, true);
 };
