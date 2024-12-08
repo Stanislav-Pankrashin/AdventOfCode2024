@@ -10,7 +10,7 @@ const getTotalOfCalculation = (
     }
 
     if (currentIndex >= values.length) {
-        return -1;
+        return 0;
     }
 
     const added = total + values[currentIndex];
@@ -41,17 +41,9 @@ const getTotalOfCalculation = (
               allowConcatenation,
               currentIndex + 1,
           )
-        : -1;
+        : 0;
 
-    if (
-        addedResult !== -1 ||
-        multipliedResult !== -1 ||
-        concatenatedResult !== -1
-    ) {
-        return target;
-    }
-
-    return -1;
+    return addedResult || multipliedResult || concatenatedResult;
 };
 
 const getValidTotal = (fileLines: string[], allowConcatenation = false) => {
